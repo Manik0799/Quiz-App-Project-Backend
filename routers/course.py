@@ -42,8 +42,6 @@ async def update(id : str, request : UpdateCourseSchema):
     if not updated_course:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail = "Update could not be completed")
     return f"Record with id - {id}, Updated successfully"
-        
-
 
 @router.delete('/{id}')
 async def drop(id):

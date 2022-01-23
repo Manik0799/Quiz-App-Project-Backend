@@ -7,6 +7,8 @@ client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
 
 database = client.quizapp
 courses_collection = database.courses
+teachers_collection = database.teachers
+
 
 # helpers
 def course_helper(course) -> dict :
@@ -15,6 +17,14 @@ def course_helper(course) -> dict :
         'course_name' : course['course_name'],
         'course_code' : course['course_code'],
         'creator_id' : course['creator_id']
+        }
+
+def teacher_helper(teacher) -> dict :
+    return{
+        'id' : str(teacher['_id']),
+        'name' : teacher['name'],
+        'email' : teacher['email'],
+        'password' : teacher['password']
         }
 
 # CRUD operations
@@ -52,3 +62,33 @@ async def delete_course(id :str):
     if course:
         await courses_collection.delete_one({'_id' : ObjectId(id)})
         return True
+
+# CRUD Operations - Teacher
+async def fetch_all_teachers():
+    teachers = []
+    async for document in teachers_collection.find():
+        teachers.append(teacher_helper(document))
+    return teachers
+
+async def fetch_teacher(id : str):
+    teacher = await teachers_collection.find_one({'_id' : ObjectId(id)})
+    if teacher:
+        return teacher
+
+async def create_teacher(teacher_data : dict) -> dict:
+    teacher = await teachers_collection.insert_one(teacher_data)
+    new_teacher = await teachers_collection.find_one({'_id' : teacher.inserted_id})
+    return teacher_helper(new_teacher)
+
+async def update_teacher(id : str, data : dict):
+    # Return false if an empty request body is sent.
+    if len(data) < 1:
+        return False
+    teacher = await teachers_collection.find_one({"_id": ObjectId(id)})
+    if teacher:
+        updated_teacher = await teachers_collection.update_one(
+            {"_id": ObjectId(id)}, {"$set": data}
+        )
+        if updated_teacher:
+            return True
+        return False
