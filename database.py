@@ -8,7 +8,7 @@ client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
 database = client.quizapp
 courses_collection = database.courses
 teachers_collection = database.teachers
-
+students_collection = database.students
 
 # helpers
 def course_helper(course) -> dict :
@@ -26,6 +26,16 @@ def teacher_helper(teacher) -> dict :
         'email' : teacher['email'],
         'password' : teacher['password']
         }
+
+def student_helper(student) -> dict :
+    return{
+        'id' : str(student['_id']),
+        'name' : student['name'],
+        'roll_no' : student['roll_no'],
+        'email' : student['email'],
+        'password' : student['password']
+        }
+
 
 # CRUD operations
 async def fetch_all_courses():
@@ -90,5 +100,35 @@ async def update_teacher(id : str, data : dict):
             {"_id": ObjectId(id)}, {"$set": data}
         )
         if updated_teacher:
+            return True
+        return False
+
+# CRUD Operations - Student User
+async def fetch_all_students():
+    students = []
+    async for document in students_collection.find():
+        students.append(student_helper(document))
+    return students
+
+async def fetch_student(id : str):
+    student = await students_collection.find_one({'_id' : ObjectId(id)})
+    if student:
+        return student
+
+async def create_student(student_data : dict) -> dict:
+    student = await students_collection.insert_one(student_data)
+    new_student = await students_collection.find_one({'_id' : student.inserted_id})
+    return student_helper(new_student)
+
+async def update_student(id : str, data : dict):
+    # Return false if an empty request body is sent.
+    if len(data) < 1:
+        return False
+    student = await students_collection.find_one({"_id": ObjectId(id)})
+    if student:
+        updated_student = await students_collection.update_one(
+            {"_id": ObjectId(id)}, {"$set": data}
+        )
+        if updated_student:
             return True
         return False

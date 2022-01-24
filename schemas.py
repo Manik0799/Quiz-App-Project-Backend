@@ -37,3 +37,27 @@ class UpdateTeacherSchema(BaseModel):
     password : Optional[str]
     class Config():
         orm_mode = True
+
+# ///////////////////////////////////////
+# Student Schema
+class StudentSchema(BaseModel):
+    name : str = Field(...)
+    roll_no : str
+    email : EmailStr = Field(...)
+    password : str = Field(...)
+
+class ShowStudentSchema(BaseModel):
+    name : str = Field(...)
+    roll_no : str = Field(...)
+    email : EmailStr = Field(...)
+
+    class Config():
+        orm_mode = True
+
+class UpdateStudentSchema(BaseModel):
+    name : Optional[str]
+    roll_no : Optional[str]
+    email : Optional[EmailStr]
+    password : Optional[str]
+    class Config():
+        orm_mode = True
