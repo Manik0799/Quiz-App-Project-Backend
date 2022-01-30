@@ -73,7 +73,7 @@ async def delete_course(id :str):
         await courses_collection.delete_one({'_id' : ObjectId(id)})
         return True
 
-# CRUD Operations - Teacher
+# CRUD Operations - Teacher User
 async def fetch_all_teachers():
     teachers = []
     async for document in teachers_collection.find():
