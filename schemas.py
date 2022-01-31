@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
 
@@ -6,6 +7,7 @@ class CourseSchema(BaseModel):
     course_name : str = Field(...)
     course_code : str 
     creator_id : int = Field(...)
+    created_at : datetime
 
 class ShowCourse(CourseSchema):
     class Config():
@@ -23,6 +25,7 @@ class TeacherSchema(BaseModel):
     name : str = Field(...)
     email : EmailStr = Field(...)
     password : str = Field(...)
+    created_at : datetime
 
 class ShowTeacherSchema(BaseModel):
     name : str = Field(...)
@@ -45,6 +48,7 @@ class StudentSchema(BaseModel):
     roll_no : str
     email : EmailStr = Field(...)
     password : str = Field(...)
+    created_at : datetime
 
 class ShowStudentSchema(BaseModel):
     name : str = Field(...)
