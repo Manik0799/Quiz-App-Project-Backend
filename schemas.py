@@ -1,4 +1,5 @@
 from datetime import datetime
+from turtle import st
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
 
@@ -65,3 +66,17 @@ class UpdateStudentSchema(BaseModel):
     password : Optional[str]
     class Config():
         orm_mode = True
+
+
+# Login Schema
+class Login(BaseModel):
+    email : EmailStr = Field(...)
+    password : str = Field(...)
+
+# For JWT Token
+class Token(BaseModel):
+    access_token : str
+    token_type : str
+
+class TokenData(BaseModel):
+    email : Optional[str] = None
