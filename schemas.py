@@ -1,5 +1,4 @@
 from datetime import datetime
-from turtle import st
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
 

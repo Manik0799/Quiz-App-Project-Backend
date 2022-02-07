@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, HTTPException, status
+from fastapi import APIRouter, Body, HTTPException, status, Depends
 from fastapi.encoders import jsonable_encoder
 from database import (
     fetch_all_courses,
@@ -7,7 +7,8 @@ from database import (
     update_course,
     delete_course
 )
-from schemas import CourseSchema, ShowCourse, UpdateCourseSchema
+from oauth2 import get_current_user
+from schemas import CourseSchema, ShowCourse, TeacherSchema, UpdateCourseSchema
 
 
 router = APIRouter(
@@ -30,13 +31,20 @@ async def get_course(id):
     return course
 
 @router.post('/')
-async def add(course: CourseSchema = Body(...)):
+async def add(course: CourseSchema = Body(...), current_user : TeacherSchema = Depends(get_current_user)):
+   
+    # The next line currently prints just the user email that has been logged in
+    # print(current_user)
+    # By getting the current logged in email of the teacher, we need to get the objectID of that
+    # teacher, in order to insert it into the database, when a course is being created!!!
+
     course = jsonable_encoder(course)
     new_course = await create_course(course)
     return {'data' : new_course}
 
 @router.put('/{id}')
-async def update(id : str, request : UpdateCourseSchema):
+async def update(id : str, request : UpdateCourseSchema, current_user : TeacherSchema = Depends(get_current_user)):
+    
     req = {k: v for k, v in request.dict().items() if v is not None}
     updated_course = await update_course(id, req)
     if not updated_course:
@@ -44,7 +52,8 @@ async def update(id : str, request : UpdateCourseSchema):
     return f"Record with id - {id}, Updated successfully"
 
 @router.delete('/{id}')
-async def drop(id):
+async def drop(id, current_user : TeacherSchema = Depends(get_current_user)):
+    
     deleted_course = await delete_course(id)
     if deleted_course:
         return {'detail' : f'Course with id {id} successfully deleted'}
