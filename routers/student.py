@@ -74,7 +74,6 @@ async def join_course(info : JoinCourseSchema = Body(...) ):
             'course_name' : fetched_course['course_name']
         }
 
-
         response = await join_course_with_id(studentId, course_data)
         if response:
             return {'message' : 'Successfully joined the Class'}
