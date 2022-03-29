@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from database import(
     create_teacher,
     fetch_all_teachers,
+    fetch_courses_for_a_teacher,
     fetch_teacher,
     update_teacher
 )
@@ -49,3 +50,10 @@ async def update(id : str, request : UpdateTeacherSchema):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail = "Update could not be completed")
     return f"Record with id - {id}, Updated successfully"
         
+@router.get('/fetchCourseList/{teacher_id}')
+async def fetchCourseList(teacher_id : str):
+    response = await fetch_courses_for_a_teacher(teacher_id)
+    if response:
+        return response
+    
+    return {'message' : 'No course Found'}

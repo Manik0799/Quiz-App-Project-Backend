@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, EmailStr, Field
 
 # Course Schema
 class CourseSchema(BaseModel):
     course_name : str = Field(...)
     course_code : str 
-    creator_id : int = Field(...)
+    creator_id : str = Field(...)
     created_at : datetime
 
 class ShowCourse(CourseSchema):
@@ -25,6 +25,7 @@ class TeacherSchema(BaseModel):
     name : str = Field(...)
     email : EmailStr = Field(...)
     password : str = Field(...)
+    courses  : List = []
     created_at : datetime
 
 class ShowTeacherSchema(BaseModel):
