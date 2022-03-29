@@ -50,6 +50,7 @@ class StudentSchema(BaseModel):
     email : EmailStr = Field(...)
     password : str = Field(...)
     created_at : datetime
+    courses  : List = []
 
 class ShowStudentSchema(BaseModel):
     name : str = Field(...)
@@ -67,6 +68,9 @@ class UpdateStudentSchema(BaseModel):
     class Config():
         orm_mode = True
 
+class JoinCourseSchema(BaseModel):
+    studentId : str = Field(...)
+    courseId : str  = Field(...)
 
 # Login Schema
 class Login(BaseModel):

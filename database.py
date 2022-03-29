@@ -155,8 +155,18 @@ async def update_student(id : str, data : dict):
     student = await students_collection.find_one({"_id": id})
     if student:
         updated_student = await students_collection.update_one(
-            {"_id": ObjectId(id)}, {"$set": data}
+            {"_id": id}, {"$set": data}
         )
         if updated_student:
             return True
         return False
+
+async def join_course_with_id(studentId: str, course_data : dict):
+    student = await students_collection.find_one({'_id' : studentId})
+    if student:
+        student['courses'].append(dict(course_data))
+        response = await students_collection.update_one({"_id": studentId}, {"$set": student})
+        if response:
+            return True
+    
+    return False
