@@ -14,7 +14,7 @@ router = APIRouter(
 async def create_new_quiz(req : Request):
     req = await req.json()
 
-    if not "course_id" in req or not "start_time" in req or not "duration" in req or not "no_of_questions" in req:
+    if not "course_id" in req or not "start_time" in req or not "duration" in req:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= "Please send all fields in request")
     
     # Checking the validity of the 'course_id' field
