@@ -20,22 +20,22 @@
     "quizzes_given" : [
         # Quiz 1
         {
-            "quiz_id" : "6242d671239d9865faaa471e",
-            "total_marks_obtained" : 15,
-            "answer_descriptions" : [
+            "quiz_id" : "6242ee323a5ff04b30f73ad6",
+            "total_marks_obtained" : 10, # sum of all marks_obtained from all the questions
+            "answers" : [
                 # Q1
                 {
-                    "question_id" : "4242535fdgerg343",
-                    "option_marked_id" : '1',
+                    "question_id" : "6242d671129d9865faaa471e",
+                    "marked_option_id" : '2',
                     "correct" : True,
-                    "marks_fetched" : 7
+                    "marks_obtained" : 5
                 },
                 # Q2
                 {
-                    "question_id" : "24234324nkenf3",
-                    "option_marked_id" : '2',
+                    "question_id" : "6242d671129d9865faaa471f",
+                    "marked_option_id" : '3',
                     "correct" : True,
-                    "marks_fetched" : 8
+                    "marks_obtained" : 5
                 }
             ]
         },
@@ -43,27 +43,27 @@
         {
             "quiz_id" : "8282671239d9865faaa471e",
             "total_marks_obtained" : 10,
-            "answer_descriptions" : [
+            "answers" : [
                 # Q1
                 {
                     "question_id" : "654535fdgerg343",
-                    "option_marked_id" : '3',
+                    "marked_option_id" : '3',
                     "correct" : True,
-                    "marks_fetched" : 5
+                    "marks_obtained" : 5
                 },
                 # Q2
                 {
                     "question_id" : "57234324nkenf3",
-                    "option_marked_id" : '4',
+                    "marked_option_id" : '4',
                     "correct" : False,
-                    "marks_fetched" : 0
+                    "marks_obtained" : 0
                 },
                 # Q3
                 {
                     "question_id" : "097234324nkenf3",
-                    "option_marked_id" : '1',
+                    "marked_option_id" : '1',
                     "correct" : True,
-                    "marks_fetched" : 5
+                    "marks_obtained" : 5
                 }
             ]
         }

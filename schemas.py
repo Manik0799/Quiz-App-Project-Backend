@@ -51,6 +51,7 @@ class StudentSchema(BaseModel):
     password : str = Field(...)
     created_at : datetime
     courses  : List = []
+    quizzes : List = []
 
 class ShowStudentSchema(BaseModel):
     name : str = Field(...)

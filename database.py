@@ -9,6 +9,7 @@ database = client.quizapp
 courses_collection = database.courses
 teachers_collection = database.teachers
 students_collection = database.students
+quizzes_collection = database.quizzes
 
 # helpers
 def course_helper(course) -> dict :
@@ -165,6 +166,28 @@ async def join_course_with_id(studentId: str, course_data : dict):
     student = await students_collection.find_one({'_id' : studentId})
     if student:
         student['courses'].append(dict(course_data))
+        response = await students_collection.update_one({"_id": studentId}, {"$set": student})
+        if response:
+            return True
+    
+    return False
+
+
+
+async def create_quiz(quiz_data : dict) -> dict:
+
+    id  = ObjectId()
+    quiz_data['_id'] = str(id)
+    quiz = await quizzes_collection.insert_one(quiz_data)
+
+    if quiz.inserted_id:
+        return True
+    return False
+
+async def insert_quiz_data_to_student(studentId : str, quiz_data : dict):
+    student = await students_collection.find_one({'_id' : studentId})
+    if student:
+        student['quizzes'].append(dict(quiz_data))
         response = await students_collection.update_one({"_id": studentId}, {"$set": student})
         if response:
             return True
