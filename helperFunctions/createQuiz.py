@@ -20,7 +20,7 @@ def create_additional_fields_for_quiz(req):
     
     req["total_marks"] = total_marks
 
-     # generating timestamp for the created_at field
+    # generating timestamp for the created_at field
     dtime = datetime.datetime.now()
     createdAt = time.mktime(dtime.timetuple())*1000
     req["created_at"] = bson.int64.Int64(createdAt)

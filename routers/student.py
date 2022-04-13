@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, HTTPException, status
+from fastapi import APIRouter, Body, HTTPException, status, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.encoders import jsonable_encoder
 from database import(
@@ -33,6 +33,7 @@ async def get_student(id):
 
 @router.post('/')
 async def add(request : StudentSchema = Body(...)):
+
     student = jsonable_encoder(request)
     hashedPassword = Hash.bcrypt(student['password'])
     student['password'] = hashedPassword

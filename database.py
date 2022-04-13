@@ -1,6 +1,8 @@
 from bson.objectid import ObjectId
 # MongoDB Driver
 import motor.motor_asyncio
+import datetime, time, bson
+from bson.objectid import ObjectId
 
 MONGO_DETAILS = 'mongodb://localhost:27017'
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
@@ -58,6 +60,12 @@ async def create_course(course_data : dict) -> dict:
     if creator:
         id  = ObjectId()
         course_data['_id'] = str(id)
+
+        # generating timestamp for the created_at field
+        dtime = datetime.datetime.now()
+        createdAt = time.mktime(dtime.timetuple())*1000
+        course_data["created_at"] = bson.int64.Int64(createdAt)
+
         course = await courses_collection.insert_one(course_data)
         new_course = await courses_collection.find_one({'_id' : course.inserted_id})
         return course_helper(new_course)
@@ -98,6 +106,12 @@ async def fetch_teacher(id : str):
 async def create_teacher(teacher_data : dict) -> dict:
     id  = ObjectId()
     teacher_data['_id'] = str(id)
+
+    # generating timestamp for the created_at field
+    dtime = datetime.datetime.now()
+    createdAt = time.mktime(dtime.timetuple())*1000
+    teacher_data["created_at"] = bson.int64.Int64(createdAt)
+
     teacher = await teachers_collection.insert_one(teacher_data)
     new_teacher = await teachers_collection.find_one({'_id' : teacher.inserted_id})
     return teacher_helper(new_teacher)
@@ -145,6 +159,12 @@ async def fetch_student(id : str):
 async def create_student(student_data : dict) -> dict:
     id  = ObjectId()
     student_data['_id'] = str(id)
+
+    # generating timestamp for the created_at field
+    dtime = datetime.datetime.now()
+    createdAt = time.mktime(dtime.timetuple())*1000
+    student_data["created_at"] = bson.int64.Int64(createdAt)
+
     student = await students_collection.insert_one(student_data)
     new_student = await students_collection.find_one({'_id' : student.inserted_id})
     return student_helper(new_student)
