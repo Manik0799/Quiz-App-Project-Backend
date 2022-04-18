@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Request, HTTPException, status
-
+from fastapi import APIRouter, File, Request, HTTPException, UploadFile, status
+import pandas as pd
 from database import courses_collection, create_quiz, insert_quiz_data_to_student, quizzes_collection, students_collection
 from helperFunctions.checkQuizAnswers import check_answers
 from helperFunctions.createQuiz import create_additional_fields_for_quiz
+from helperFunctions.prepareDataFromDf import prepare_questions_from_dataframe
 router = APIRouter(
     prefix = '/quiz',
     tags = ["Quiz"]
@@ -69,3 +70,11 @@ async def submit_quiz(req : Request):
             return {'message' : 'Successfully submitted the Quiz'}
         
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail = "Error in quiz submission")
+
+# Route for reading the csv file of the quiz questions
+@router.post('/read-csv-file')
+async def read_questions_from_csv_file(csv_file : UploadFile = File(...)):
+    dataframe = pd.read_csv(csv_file.file)
+
+    response = prepare_questions_from_dataframe(dataframe)
+    return response
