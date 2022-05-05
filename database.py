@@ -213,3 +213,18 @@ async def insert_quiz_data_to_student(studentId : str, quiz_data : dict):
             return True
     
     return False
+
+async def fetch_quiz(quizId : str):
+    quiz = await quizzes_collection.find_one({'_id' : quizId})
+    if quiz:
+        return quiz
+
+async def add_quiz_to_course_collection(course_id, quiz_info) :
+
+    course = await courses_collection.find_one({'_id' : course_id})
+    if course:
+        course['quizzes'].append(dict(quiz_info))
+        response = await courses_collection.update_one({"_id": course_id}, {"$set": course})
+        if response:
+            return True
+    return False

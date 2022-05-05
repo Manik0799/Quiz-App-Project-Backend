@@ -7,6 +7,7 @@ class CourseSchema(BaseModel):
     course_name : str = Field(...)
     course_code : str 
     creator_id : str = Field(...)
+    quizzes : List = []
 
 class ShowCourse(CourseSchema):
     class Config():

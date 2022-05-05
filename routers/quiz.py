@@ -1,6 +1,6 @@
 from fastapi import APIRouter, File, Request, HTTPException, UploadFile, status
 import pandas as pd
-from database import courses_collection, create_quiz, insert_quiz_data_to_student, quizzes_collection, students_collection
+from database import add_quiz_to_course_collection, courses_collection, create_quiz, fetch_quiz, insert_quiz_data_to_student, quizzes_collection, students_collection
 from helperFunctions.checkQuizAnswers import check_answers
 from helperFunctions.createQuiz import create_additional_fields_for_quiz
 from helperFunctions.prepareDataFromDf import prepare_questions_from_dataframe
@@ -8,6 +8,14 @@ router = APIRouter(
     prefix = '/quiz',
     tags = ["Quiz"]
 )
+
+# Get Quiz by Id
+@router.get('/quiz/{id}')
+async def get_quiz_by_id(id : str):
+    quiz = await fetch_quiz(id)
+    if not quiz:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail= f"Quiz with id - {id}, Not found")
+    return quiz
 
 
 # Create a quiz
@@ -30,7 +38,17 @@ async def create_new_quiz(req : Request):
     response = await create_quiz(req)
 
     if response:
-        return {'message': 'Quiz successfully created'}
+        # Fetching the course_id to which the new quiz belongs
+        course_id = req['course_id']
+        quiz_data = {
+            '_id' : req['_id'],
+            'no_of_questions' : req['no_of_questions'],
+            'end_time' : req['end_time']
+        }
+
+        res = await add_quiz_to_course_collection(course_id = course_id, quiz_info= quiz_data)
+        if res:
+            return {'message': 'Quiz successfully created'}
     
     else:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Failed to create the quiz")
