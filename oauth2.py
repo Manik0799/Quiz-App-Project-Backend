@@ -6,9 +6,9 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt_token import verify_token
 
 
-# 'login/teacher' is the route from where fastAPI will fetch
+# 'login' is the route from where fastAPI will fetch
 #  the token and then check its validity in the get_current_user() function
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login/teacher")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 # this function checks the validity of the JWT token
 def get_current_user(token : str = Depends(oauth2_scheme)):

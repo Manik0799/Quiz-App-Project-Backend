@@ -4,7 +4,7 @@ from routers import course, quiz, teacher, student, login
 
 app = FastAPI()
 
-origins = ['https://localhost:3000']
+origins = ['*']
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

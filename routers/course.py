@@ -1,5 +1,8 @@
+from multiprocessing.managers import BaseManager
+from typing import List
 from fastapi import APIRouter, Body, HTTPException, status, Depends
 from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel, Field
 from database import (
     add_course_to_teacher,
     fetch_all_courses,
@@ -17,6 +20,10 @@ router = APIRouter(
     tags = ["Courses"]
 )
 
+class Info(BaseModel):
+    email : str
+    id : str
+
 @router.get('/')
 async def get_all():
     courses = await fetch_all_courses()
@@ -24,7 +31,15 @@ async def get_all():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail= "Empty collection - no course found")
     return courses
 
-@router.get('/{id}', response_model= ShowCourse)
+
+# class ShowCourseInfo(BaseModel):
+#     _id : str = Field(...)
+#     course_name : str = Field(...)
+#     course_code : str 
+#     creator_id
+#     quizzes : List = []
+# , response_model= ShowCourse
+@router.get('/{id}')
 async def get_course(id):
     course = await fetch_course(id)
     if not course:
@@ -32,15 +47,11 @@ async def get_course(id):
     return course
 
 @router.post('/')
-async def add(course: CourseSchema = Body(...)):
-   
-    # The next line currently prints just the user email that has been logged in
-    # print(current_user)
-    # By getting the current logged in email of the teacher, we need to get the objectID of that
-    # teacher, in order to insert it into the database, when a course is being created!!!
+async def add(current_user  : Info = Depends(get_current_user), course: CourseSchema = Body(...)):
+
 
     course = jsonable_encoder(course)
-    new_course = await create_course(course)
+    new_course = await create_course(current_user.id, course)
 
     if new_course:
 
@@ -56,7 +67,7 @@ async def add(course: CourseSchema = Body(...)):
         response = await add_course_to_teacher(teacher_id, course_data)
 
         if response:
-            return {'message': 'Course added successfully'}
+            return {'message': 'Course added successfully', "id" : new_course['id']}
 
     
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail= f"Please Insert a valid creator_id")

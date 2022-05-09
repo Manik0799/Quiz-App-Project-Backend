@@ -6,7 +6,6 @@ from pydantic import BaseModel, EmailStr, Field
 class CourseSchema(BaseModel):
     course_name : str = Field(...)
     course_code : str 
-    creator_id : str = Field(...)
     quizzes : List = []
 
 class ShowCourse(CourseSchema):
@@ -68,7 +67,6 @@ class UpdateStudentSchema(BaseModel):
         orm_mode = True
 
 class JoinCourseSchema(BaseModel):
-    studentId : str = Field(...)
     courseId : str  = Field(...)
 
 # Login Schema
@@ -83,3 +81,5 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email : Optional[str] = None
+    id : Optional[str] = None
+    userType : Optional[str] = None

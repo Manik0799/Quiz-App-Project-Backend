@@ -50,16 +50,24 @@ async def fetch_all_courses():
 async def fetch_course(id : str):
     course = await courses_collection.find_one({'_id' : id})
     if course:
+        # Get Creator info
+        creator_id = course.get('creator_id')
+        creator = await teachers_collection.find_one({'_id' : creator_id}, {'name' : 1, 'email' : 1, '_id' : 0})
+        print(type(creator))
+        course['creator_name'] = creator.get('name')
+        course['email'] = creator.get('email')
+
         return course
 
-async def create_course(course_data : dict) -> dict:
+async def create_course(creator_id, course_data : dict):
 
     # Checking whether creator_id is valid or not
-    creator = await teachers_collection.find_one({'_id' : course_data['creator_id']})
+    creator = await teachers_collection.find_one({'_id' : creator_id})
     
     if creator:
         id  = ObjectId()
         course_data['_id'] = str(id)
+        course_data['creator_id'] = creator_id
 
         # generating timestamp for the created_at field
         dtime = datetime.datetime.now()

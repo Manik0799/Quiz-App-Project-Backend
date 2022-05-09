@@ -1,51 +1,64 @@
-from fastapi import APIRouter, Body, HTTPException, status, Request
+from fastapi import APIRouter, Body, Depends, HTTPException, status, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel
 from database import(
     create_student,
     fetch_all_students,
     fetch_student,
     update_student,
     join_course_with_id,
-    courses_collection
+    courses_collection,
+    students_collection
 )
+from oauth2 import get_current_user
 from schemas import JoinCourseSchema, StudentSchema, ShowStudentSchema, UpdateStudentSchema
 from hashing import Hash
 
 router = APIRouter(
-    prefix = '/student',
     tags = ["Students"]
 )
 
-@router.get('/')
-async def show_all():
-    students = await fetch_all_students()
-    if not students:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail= "Empty collection - No Student found")
-    return students
 
-@router.get('/{id}', response_model= ShowStudentSchema)
-async def get_student(id):
-    student = await fetch_student(id)
+class Student(BaseModel):
+    email : str
+    id : str
+
+# @router.get('/')
+# async def show_all():
+#     students = await fetch_all_students()
+#     if not students:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail= "Empty collection - No Student found")
+#     return students
+
+@router.get('/student', response_model= ShowStudentSchema)
+async def get_student(current_user : Student = Depends(get_current_user)):
+    student = await fetch_student(current_user.id)
     if not student:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail= f"Student with id - {id}, Not found")
     return student
 
-@router.post('/')
+@router.post('/student')
 async def add(request : StudentSchema = Body(...)):
 
     student = jsonable_encoder(request)
     hashedPassword = Hash.bcrypt(student['password'])
     student['password'] = hashedPassword
     new_student = await create_student(student)
-    return new_student
+    return {'message' : 'Successfully created new user'}
 
-@router.put('/{id}')
-async def update(id : str, request : UpdateStudentSchema):
+@router.put('/student')
+async def update(request : UpdateStudentSchema, current_user : Student = Depends(get_current_user)):
+
+    id = current_user.id
+
     req = {k: v for k, v in request.dict().items() if v is not None}
-    # Hashing the received password
-    hashedPassword = Hash.bcrypt(req['password'])
-    req['password'] = hashedPassword
+
+    if req.get('password'):
+        # Hashing the received password
+        hashedPassword = Hash.bcrypt(req.get('password'))
+        req['password'] = hashedPassword
+
     # Updating the record
     updated_student = await update_student(id, req)
     if not updated_student:
@@ -54,13 +67,12 @@ async def update(id : str, request : UpdateStudentSchema):
         
 
 
-
 # Other functional API endpoints
-@router.post('/join-course')
-async def join_course(info : JoinCourseSchema = Body(...) ):
-
+@router.post('/student-join-course')
+async def join_course(info : JoinCourseSchema = Body(...), current_user : Student = Depends(get_current_user)):
+    
+    studentId = current_user.id
     info = jsonable_encoder(info)
-    studentId = info['studentId']
     courseId = info['courseId']
    
     # 1. Search if the course exists in the database
@@ -84,3 +96,19 @@ async def join_course(info : JoinCourseSchema = Body(...) ):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail= "Invalid Course Code! Please try again")
     
 
+# Get all the courses that a student has joined
+
+
+@router.get('/student-joined-courses')
+async def get_joined_courses(current_user : Student = Depends(get_current_user)):
+
+    # Fetching the id of the current logged in student
+    studentId = current_user.id
+    
+    # For this studentId fetch all the courses that he/she has enrolled in
+    info = await students_collection.find_one({'_id': studentId}, {'courses' : 1, '_id' : 0})
+
+    if (len(info.get('courses'))) == 0:
+        return {'message' : "Student has not joined any course yet"}
+    else:
+        return info.get('courses')
