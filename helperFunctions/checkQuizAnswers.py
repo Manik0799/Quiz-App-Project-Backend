@@ -31,7 +31,7 @@ async def check_answers(data):
                         answer['marks_obtained'] = 0
 
     
-    data['total_marks_obatined'] = total_marks_obtained
+    data['total_marks_obtained'] = total_marks_obtained
 
     return data
 
