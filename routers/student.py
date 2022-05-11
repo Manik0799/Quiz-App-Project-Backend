@@ -1,16 +1,19 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile, status, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
+from typing import List
 from database import(
     create_student,
     fetch_all_students,
     fetch_student,
     update_student,
     join_course_with_id,
+    quizzes_collection,
     courses_collection,
     students_collection
 )
+from helperFunctions.sendEmail import send_email
 from oauth2 import get_current_user
 from schemas import JoinCourseSchema, StudentSchema, ShowStudentSchema, UpdateStudentSchema
 from hashing import Hash
@@ -112,3 +115,64 @@ async def get_joined_courses(current_user : Student = Depends(get_current_user))
         return {'message' : "Student has not joined any course yet"}
     else:
         return info.get('courses')
+
+
+
+def quizListHelper(quiz) -> dict :
+    return{
+        'id' : str(quiz['_id']),
+        }
+
+# Get all the quizzes a student has given of a particular course
+@router.get('/student-given-quizzes/{courseId}')
+async def get_given_quizzes_of_student_by_courseId(courseId : str, current_user : Student = Depends(get_current_user)):
+    # Fetching the id of the current logged in student
+    studentId = current_user.id
+    
+    # Fetch all quiz data from student's collection
+    quizData = await students_collection.find_one({'_id' : studentId}, {'quizzes' : 1, '_id': 0})
+    quizListofStudent =  quizData.get('quizzes')
+
+    if(len(quizListofStudent) == 0):
+        return []
+
+    quizGivenData = []
+    
+    for quiz in quizListofStudent:
+        course_id = quiz.get('course_id')
+        if(course_id == courseId):
+            quizGivenData.append(quiz)
+
+    return quizGivenData
+
+
+
+# Send marked responses as a mail
+# One element from the above route array will be the request payload to this endpoint
+@router.post('/student-send-responses-mail')
+async def send_response_mail(req : Request, current_user : Student = Depends(get_current_user)):
+    req = await req.json()
+    studentId = current_user.id
+    studentEmail = current_user.email
+    quizId = req.get('quiz_id')
+    courseId = req.get('course_id')
+    marked_answers = req.get('answers')
+
+    # Send email to user
+    response = send_email(req, studentEmail) 
+    
+    return response
+
+from helperFunctions.uploadImagesToS3 import upload_images_to_s3, bucket_name
+
+@router.post('/student-quiz-images')
+async def upload_student_images(fileobject : UploadFile = File(...)):
+
+    filename =  fileobject.filename
+    data = fileobject.file._file
+    response = upload_images_to_s3(data, filename, bucket_name)
+
+    if response == "error":
+        return {"error" : "Could not upload User Images."}
+
+    return {"message" : "Upload Successful."}

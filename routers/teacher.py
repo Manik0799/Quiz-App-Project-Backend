@@ -66,3 +66,6 @@ async def fetchCourseList(current_user : Teacher = Depends(get_current_user)):
         return response
     
     return []
+
+
+# Get Quiz data for a course created by teacher

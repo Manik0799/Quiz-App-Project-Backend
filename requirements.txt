@@ -7,3 +7,5 @@ bcrypt
 python-multipart
 python-jose
 pandas
+python-dotenv
+boto3

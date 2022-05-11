@@ -53,7 +53,6 @@ async def fetch_course(id : str):
         # Get Creator info
         creator_id = course.get('creator_id')
         creator = await teachers_collection.find_one({'_id' : creator_id}, {'name' : 1, 'email' : 1, '_id' : 0})
-        print(type(creator))
         course['creator_name'] = creator.get('name')
         course['email'] = creator.get('email')
 

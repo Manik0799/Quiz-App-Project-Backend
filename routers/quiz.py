@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 # Get Quiz by Id
-@router.get('/quiz/{id}')
+@router.get('/{id}')
 async def get_quiz_by_id(id : str):
     quiz = await fetch_quiz(id)
     if not quiz:
