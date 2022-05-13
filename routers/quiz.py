@@ -1,13 +1,20 @@
-from fastapi import APIRouter, File, Request, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Request, HTTPException, UploadFile, status
 import pandas as pd
+from pydantic import BaseModel
 from database import add_quiz_to_course_collection, courses_collection, create_quiz, fetch_quiz, insert_quiz_data_to_student, quizzes_collection, students_collection
 from helperFunctions.checkQuizAnswers import check_answers
 from helperFunctions.createQuiz import create_additional_fields_for_quiz
 from helperFunctions.prepareDataFromDf import prepare_questions_from_dataframe
+from oauth2 import get_current_user
 router = APIRouter(
     prefix = '/quiz',
     tags = ["Quiz"]
 )
+
+
+class Student(BaseModel):
+    email : str
+    id : str
 
 # Get Quiz by Id
 @router.get('/{id}')
@@ -15,6 +22,7 @@ async def get_quiz_by_id(id : str):
     quiz = await fetch_quiz(id)
     if not quiz:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail= f"Quiz with id - {id}, Not found")
+    
     return quiz
 
 
@@ -56,10 +64,12 @@ async def create_new_quiz(req : Request):
 
 # Submit quiz
 @router.post("/submit-quiz")
-async def submit_quiz(req : Request):
+async def submit_quiz(req : Request, current_user : Student = Depends(get_current_user)):
+    
+    studentId = current_user.id
     req = await req.json()
 
-    if not "quiz_id" in req or not "student_id" in req or not "answers" in req:
+    if not "quiz_id" in req or not "answers" in req:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= "Missing fields")
     
     # Checking the validity of the quiz_id
@@ -68,13 +78,12 @@ async def submit_quiz(req : Request):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No quiz found with given quizId")
 
     # Checking the validity of the student_id
-    student = await students_collection.find_one({'_id' : req['student_id']})
+    student = await students_collection.find_one({'_id' : studentId})
     if not student:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Invalid studentId")
     
     # Deleting the studentId field from the req
-    student_id = req['student_id']
-    del req['student_id']
+    student_id = studentId
 
     # Checking the answers
     result = await check_answers(req)

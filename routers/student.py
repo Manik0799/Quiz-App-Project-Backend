@@ -3,6 +3,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from typing import List
+import time, bson, io, uuid, datetime, base64
+
 from database import(
     create_student,
     fetch_all_students,
@@ -11,8 +13,12 @@ from database import(
     join_course_with_id,
     quizzes_collection,
     courses_collection,
-    students_collection
+    students_collection,
+    teachers_collection
 )
+from helperFunctions.uploadImagesToS3 import upload_images_to_s3, bucket_name
+
+from helperFunctions.createPresignedUrl import create_presigned_url
 from helperFunctions.sendEmail import send_email
 from oauth2 import get_current_user
 from schemas import JoinCourseSchema, StudentSchema, ShowStudentSchema, UpdateStudentSchema
@@ -163,16 +169,44 @@ async def send_response_mail(req : Request, current_user : Student = Depends(get
     
     return response
 
-from helperFunctions.uploadImagesToS3 import upload_images_to_s3, bucket_name
 
 @router.post('/student-quiz-images')
-async def upload_student_images(fileobject : UploadFile = File(...)):
+async def upload_student_images(req : Request):
 
-    filename =  fileobject.filename
-    data = fileobject.file._file
-    response = upload_images_to_s3(data, filename, bucket_name)
+    req = await req.json()
 
+    base64_str = req.get("base64_string")
+    course_id = req.get('course_id')
+
+    # Encoding and decoding the base64 string
+    base64_encoded = base64_str.encode('utf-8')
+    base64bytes = base64.b64decode(base64_encoded, validate= True)
+    bytesObj = io.BytesIO(base64bytes)
+    bytesObj.seek(0)
+
+    # Generating filename
+    # Random UUID generated
+    fileName = str(uuid.uuid1())
+    complete_filename = fileName + ".jpeg" 
+
+
+    response = upload_images_to_s3(bytesObj, complete_filename, bucket_name)
     if response == "error":
         return {"error" : "Could not upload User Images."}
+    
+    message = ""
 
-    return {"message" : "Upload Successful."}
+    responseURL = create_presigned_url(complete_filename)
+    if responseURL:
+        message = responseURL
+
+    creatorResponse = await courses_collection.find_one({'_id' : course_id}, {'creator_id' : 1, '_id' : 0})
+    
+    emailResponse = await teachers_collection.find_one({'_id' : creatorResponse.get('creator_id') }, {'email' : 1, '_id' : 0}) 
+
+    if emailResponse.get('email'):
+        email_teacher = emailResponse.get('email')
+
+        response = send_email(message = message, recepientMail= email_teacher)
+
+        return {'message' : 'Email sent to recepient'}

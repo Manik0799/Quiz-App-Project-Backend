@@ -1,6 +1,6 @@
-from uploadImagesToS3 import s3, bucket_name
 from botocore.exceptions import ClientError
 import logging
+from .uploadImagesToS3 import s3, bucket_name
 
 def create_presigned_url(object_name, expiration=3600):
 
