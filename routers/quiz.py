@@ -20,10 +20,20 @@ class Student(BaseModel):
 @router.get('/{id}')
 async def get_quiz_by_id(id : str):
     quiz = await fetch_quiz(id)
+    
+    if quiz:
+        courseId = quiz.get('course_id')
+        data = await courses_collection.find_one({'_id': courseId}, {'course_name' : 1, 'course_code' : 1, '_id' : 0})
+        
+        if data :
+            quiz['course_code'] = data.get('course_code')
+            quiz['course_name'] = data.get('course_name')
+
+        return quiz
+
     if not quiz:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail= f"Quiz with id - {id}, Not found")
     
-    return quiz
 
 # Get all quizzzes in a course
 @router.get('/course-quizzes/{course_id}')
