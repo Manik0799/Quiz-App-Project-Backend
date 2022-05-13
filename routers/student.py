@@ -54,7 +54,7 @@ async def add(request : StudentSchema = Body(...)):
     hashedPassword = Hash.bcrypt(student['password'])
     student['password'] = hashedPassword
     new_student = await create_student(student)
-    return {'message' : 'Successfully created new user'}
+    return {'message' : 'Successfully created new Student'}
 
 @router.put('/student')
 async def update(request : UpdateStudentSchema, current_user : Student = Depends(get_current_user)):

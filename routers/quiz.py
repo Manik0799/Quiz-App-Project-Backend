@@ -25,6 +25,13 @@ async def get_quiz_by_id(id : str):
     
     return quiz
 
+# Get all quizzzes in a course
+@router.get('/course-quizzes/{course_id}')
+async def get_quizzes(course_id: str):
+    responseData = await courses_collection.find_one({'_id' : course_id}, {'quizzes' : 1, '_id' : 0})
+
+    if responseData:
+        return responseData.get('quizzes')
 
 # Create a quiz
 @router.post("/create-quiz")
@@ -94,7 +101,7 @@ async def submit_quiz(req : Request, current_user : Student = Depends(get_curren
     response = await insert_quiz_data_to_student(studentId= student_id, quiz_data= result)
 
     if response:
-            return {'message' : 'Successfully submitted the Quiz'}
+            return {'message' : 'Successfully submitted the Quiz', 'total_marks' : result.get('total_marks_obtained')}
         
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail = "Error in quiz submission")
 

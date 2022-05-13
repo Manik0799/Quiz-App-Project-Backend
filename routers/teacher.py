@@ -41,7 +41,7 @@ async def add(request : TeacherSchema = Body(...)):
     hashedPassword = Hash.bcrypt(teacher['password'])
     teacher['password'] = hashedPassword
     new_teacher = await create_teacher(teacher)
-    return new_teacher
+    return {'message' : 'Successfully created new Teaher'}
 
 @router.put('/teacher/{id}')
 async def update(id : str, request : UpdateTeacherSchema):
