@@ -7,7 +7,8 @@ from database import(
     fetch_all_teachers,
     fetch_courses_for_a_teacher,
     fetch_teacher,
-    update_teacher
+    update_teacher,
+    teachers_collection
 )
 from oauth2 import get_current_user
 from schemas import TeacherSchema, ShowTeacherSchema, UpdateTeacherSchema
@@ -38,6 +39,14 @@ async def get_teacher(id):
 @router.post('/teacher')
 async def add(request : TeacherSchema = Body(...)):
     teacher = jsonable_encoder(request)
+
+    teacherEmail = teacher['email']
+
+    responseFromDB = await teachers_collection.find_one({'email' : teacherEmail})
+
+    if responseFromDB:
+        return {'message' : 'User already exists'}
+    
     hashedPassword = Hash.bcrypt(teacher['password'])
     teacher['password'] = hashedPassword
     new_teacher = await create_teacher(teacher)

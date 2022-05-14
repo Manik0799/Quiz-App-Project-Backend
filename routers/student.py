@@ -51,6 +51,12 @@ async def get_student(current_user : Student = Depends(get_current_user)):
 async def add(request : StudentSchema = Body(...)):
 
     student = jsonable_encoder(request)
+    studentEmail = student['email']
+
+    responseFromDB = await students_collection.find_one({'email' : studentEmail})
+    if responseFromDB:
+        return {'message' : 'User already exists'}
+    
     hashedPassword = Hash.bcrypt(student['password'])
     student['password'] = hashedPassword
     new_student = await create_student(student)
