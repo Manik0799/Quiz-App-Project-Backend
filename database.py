@@ -4,7 +4,6 @@ import motor.motor_asyncio
 import datetime, time, bson
 from bson.objectid import ObjectId
 
-from datetime import datetime
 
 MONGO_DETAILS = 'mongodb://localhost:27017'
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
@@ -227,10 +226,10 @@ async def fetch_quiz(quizId : str):
     quiz = await quizzes_collection.find_one({'_id' : quizId})
     if quiz:
         start_time = int(quiz.get('start_time'))/1000
-        quiz['start_time'] = datetime.utcfromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')
+        quiz['start_time'] = datetime.datetime.utcfromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')
 
         end_time = int(quiz.get('end_time'))/1000
-        quiz['end_time'] = datetime.utcfromtimestamp(end_time).strftime('%Y-%m-%d %H:%M:%S')
+        quiz['end_time'] = datetime.datetime.utcfromtimestamp(end_time).strftime('%Y-%m-%d %H:%M:%S')
 
         return quiz
 

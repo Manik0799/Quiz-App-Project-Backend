@@ -1,11 +1,12 @@
 import os
 import smtplib
-
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
 
 def send_email(message, recepientMail):
 
-    EMAIL_ADDRESS = "manik071299@gmail.com"
-    EMAIL_PASSWORD ="manikpassword"
+    EMAIL_ADDRESS = os.environ.get('EMAIL_ADDRESS')
+    EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
 
     # Mail server to use, Port number to connect
     with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
